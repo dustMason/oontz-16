@@ -78,13 +78,11 @@ void loop() {
         oontz.i2xy(i, &x, &y);
         track = y2track(y);
         beat = xy2beat(x, y);
-        /* mask = pgm_read_byte(&beatmask[beat]); */
         mask = beatmask[beat];
         if (oontz.justPressed(i)) {
           if (grid[track] & mask) { // Already set? Turn off...
             grid[track] &= ~mask;
             oontz.clrLED(i);
-            /* usbMIDI.sendNoteOff(pgm_read_byte(&note[track]), 127, pgm_read_byte(&channel[track])); */
             usbMIDI.sendNoteOff(note[track], 127, channel[track]);
           } else { // Turn on
             grid[track] |= mask;
@@ -100,11 +98,8 @@ void loop() {
   if ((t - prevBeatTime) >= beatInterval) { // Next beat?
     // Turn off old column
     line(currentBeat, false);
-    /* mask = pgm_read_byte(&beatmask[beat]); */
-    mask = beatmask[currentBeat];
     for (uint8_t track=0; track<4; track++) {
-      if (grid[track] & mask) {
-        /* usbMIDI.sendNoteOff(pgm_read_byte(&note[track]), 127, pgm_read_byte(&channel[track])); */
+      if (grid[track] & beatmask[currentBeat]) {
         usbMIDI.sendNoteOff(note[track], 127, channel[track]);
       }
     }
@@ -112,11 +107,8 @@ void loop() {
     if (++currentBeat > 15) currentBeat = 0;
     // Turn on new column
     line(currentBeat, true);
-    /* mask = pgm_read_byte(&beatmask[beat]); */
-    mask = beatmask[currentBeat];
     for (uint8_t track=0; track<4; track++) {
-      if (grid[track] & mask) {
-        /* usbMIDI.sendNoteOn(pgm_read_byte(&note[track]), 127, pgm_read_byte(&channel[track])); */
+      if (grid[track] & beatmask[currentBeat]) {
         usbMIDI.sendNoteOn(note[track], 127, channel[track]);
       }
     }
